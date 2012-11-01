@@ -1,0 +1,6 @@
+/* Reserved for non config specific twitter bootstrap overides */
+
+.container-fluid.main {
+	margin-top: 60px;
+}
+

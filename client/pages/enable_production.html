@@ -1,0 +1,26 @@
+<template name="enable_production">
+{{> module_masthead}}
+    <div class="container-fluid main">
+        <div class="row span10 offset1">
+             <div class='hero-unit {{sitePrefs "heroStyle"}}'>
+                {{>module_page_title}}
+                <div class='hero-unit-inner'>
+                
+                    <p>{{{msg "text_config_production_message"}}}</p>
+                    <p>{{{msg "text_config_production_postscript"}}}</p>
+                </div>
+            </div>
+            <div class="well span9">
+                <div class="row">
+      <!--              <div class="span2">
+                        <p>{{{button "button_back" "btn-block btn btn-inverse btn-large"}}}</p>
+                    </div> -->
+                    <div class="span4 offset2">
+                        <p>{{{button "button_config_production" "btn-block btn btn-danger btn-large"}}}</p>
+                    </div>
+                </div>
+            </div>
+          
+          </div>
+    </div>
+</template>

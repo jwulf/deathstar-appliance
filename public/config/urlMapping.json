@@ -1,0 +1,26 @@
+{
+    "/page_1" : {
+		"pageId" : "news", 
+		"path" : ["home", "news"]
+	},
+	"/about_us" : {
+		"pageId" : "faq", 
+		"path" : ["home", "faq"]
+	},
+	"/services" : {
+		"pageId" : "tutorials", 
+		"path" : ["home", "tutorials"]
+	},
+	"/products" : {
+		"pageId" : "help", 
+		"path" : ["home", "help"]
+	},
+	"/config_production" : {
+		"pageId" : "config_production",
+		"path" : ["home", "config_production"]
+	},
+        "/config_play" : {
+		"pageId" : "config_play",
+		"path" : ["home", "config_play"]
+	}
+}

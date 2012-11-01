@@ -1,0 +1,12 @@
+{
+    "default_page":"index",
+    "locale":"en_US",
+    "editableContent": false,
+    "isRTL": false,
+    "currencySymbolPosition": "left",
+    "globalDateFormat": "mm/dd/yyyy",
+    "nav" : ["index",  "faq", "tutorials", "news", "help"],
+    "configurators" : ["mode", "user", "admin"],
+    "showSidebarModule" : ["index"],
+    "heroStyle" : "light"
+}

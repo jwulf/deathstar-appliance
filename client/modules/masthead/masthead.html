@@ -1,0 +1,38 @@
+<template name="module_masthead">
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand {{{productionStateIndicator}}}" href="#">{{{msg "title_project"}}}</a>
+             {{#if isAppConfigured}}
+         <div class="btn-group pull-right">
+            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+              <i class="icon-cog"></i> {{{msg "text_masthead_configurations"}}}
+              <span class="caret"></span>
+            </a>
+
+            <ul class="dropdown-menu">
+              {{#each configurator}}
+              <li><a href="/{{configurator_id}}">{{{msg text_key}}}</a></li>
+              {{#if notLast}}<li class="divider"></li>{{/if}}
+              {{/each}}
+            </ul>
+          </div>
+
+          <div class="nav-collapse">
+            <ul class="nav">
+              {{#each nav}}
+              <li{{#if pageId id}} class="active"{{/if}}><a href="{{id}}">{{{msg text_key}}}</a></li>
+              {{/each}}
+            </ul>
+          </div><!--/.nav-collapse -->
+          {{/if}}
+        </div>
+      </div>
+    </div>
+</template>
+

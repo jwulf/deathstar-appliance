@@ -1,0 +1,14 @@
+<template name="formatPriceLeft">
+	<span class="item_price"><span class="currency_symbol">{{{msg "text_currency_symbol"}}}</span><span class="item_amount">{{this}}</span></span>
+</template>
+
+<template name="formatPriceRight">
+	<span class="item_price"><span class="item_amount">{{this}}</span><span class="currency_symbol">{{{msg "text_currency_symbol"}}}</span></span>
+</template>
+
+<template name="missing_module">
+	<div class="missing_module">
+		<h3>The module requested does not exist.</h3>
+		<p>({{this}})</p>
+	</div>
+</template>

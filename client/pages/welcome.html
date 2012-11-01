@@ -1,0 +1,28 @@
+<template name="welcome">
+{{> module_masthead}}
+    <div class="container-fluid main">
+        <div class="row span10 offset1">
+            <div class='hero-unit {{sitePrefs "heroStyle"}}'>
+                {{>module_page_title}}
+                <div class='hero-unit-inner'>
+                
+                    <p>{{{msg "text_init_config_intro_message"}}}</p>
+                    <p class="muted"><em>{{{msg "text_init_config_postscript"}}}</em></p>
+                </div>
+            </div>
+            <div class="well span9">
+                <div class="row">
+
+                    <div class="span4">
+                        <p>{{{button "button_init_wizard_playing" "btn-block btn btn-success btn-large"}}}</p>
+                    </div>
+                    <div class="span4 offset1">
+                        <p>{{{button "button_init_wizard_production" "btn-block btn btn-danger btn-large"}}}</p>
+                    </div>
+                </div>
+            </div>
+             <div class="row span2 offset8"><small><a href="/deathstar_description">{{{msg "text_deathstar_what_is_it"}}}</a></small></div>
+    </div>
+        </div>
+       
+</template>

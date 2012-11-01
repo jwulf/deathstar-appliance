@@ -1,0 +1,28 @@
+{   
+    
+    "configured" : { 
+            "faq" : "1", 
+            "news" : "1", 
+            "help" : "1", 
+            "index" : "1" , 
+            "tutorials" : "1", 
+            "add_book" : "1",
+            "configure_play" : "1",
+            "configure_production" : "1",
+            "enable_play" : "1",
+            "enable_production" : "1",
+            "deathstar_description" : "1",
+            "fallback" : "index"
+            } , 
+    "unconfigured" : { 
+            "welcome" : "1", 
+            "configure_play" : "1", 
+            "configure_production" : "1",
+            "enable_play" : "1",
+            "enable_production" : "1",
+            "deathstar_description" : "1",
+            "fallback" : "welcome" 
+            }  
+} 
+
+

@@ -1,0 +1,6 @@
+/*hero module css overides*/
+
+.hero-unit.dark {
+	background-color: #333;
+	color: #fff;
+}
