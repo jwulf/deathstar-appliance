@@ -1,8 +1,12 @@
 exec = __meteor_bootstrap__.require('child_process').exec;
 spawn = __meteor_bootstrap__.require('child_process').spawn;
 
+INSTALL_DIR = '/opt/deathstar-appliance';
+
 Meteor.startup(function () {
+
     Config = new Meteor.Collection("Configuration");
+    Updates = new Meteor.Collection("Updates");
 
 // appliance configuration is system-level files and database fields containing
 // URLS and other site-specific configuration data
@@ -36,25 +40,37 @@ Meteor.methods({
       
         console.log('Processing configuration commands:');
         console.log(configurationObject);
+        
         /* The Configuration Object looks like this:
         {
-            human_readable_task_name_1:
-            {
-                "action": "copy",
-                "src": "http://someurl/somefile",
-                "dest": "/local/file/path"
-            },
-            human_readable_task_name_2:
-            {
-                "action": "data",
-                "domain" : [system, csprocessor, appliance]
-                "field": "someDBfield",
-                "value": "somevalue"
-            },
-            human_readable_task_name_3:
-            {
-                "action": "install",
-                "package": "http://someurl/somepkg.rpm"
+            description: "Human readable description",
+            
+            uuid: UUID, // used to tell if it has been applied or not
+            
+            tasks: {
+                
+                human_readable_task_name_1:
+                {
+                    "action": "copy",
+                    "src": "http://someurl/somefile",
+                    "dest": "/local/file/path"
+                },
+                human_readable_task_name_2:
+                {
+                    "action": "data",
+                    "domain" : [system, csprocessor, appliance]
+                    "key": "someDBfield",
+                    "value": "somevalue"
+                },
+                human_readable_task_name_3:
+                {
+                    "action": "install",
+                    "package": "http://someurl/somepkg.rpm"
+                }, 
+                human_readable_task_name_4:
+                {
+                    "action": "pull_update"
+                }
             }
         }
         
@@ -62,60 +78,100 @@ Meteor.methods({
         to resolve the PressGang servers that it will use
         */
         
-        var cmd, configItem;
-        for (item in configurationObject){
-            configItem = configurationObject[item];
+        // TODO: Parse each task to make sure that it has all the request pieces
+        // A malformed update object could crash this process
+        
+        if (Updates.find({id: configurationObject.uuid}).count > 0 ){
+            console.log("Update has already been applied");
+            return('Update has already been applied');
+        }
+            
+        var cmd, task;
+        for (item in configurationObject.tasks){
+            task= configurationObject.tasks[item];
+            
             //  COPY Command
             //
             // Download a static file to the filesystem
             //
             
-            if (configItem.action && configItem.action == 'copy') {
-                
-                cmd = 'curl ' + config.src + ' --output ' + config.dest;
-                console.log('Executing: ' + cmd);
-                exec(cmd, 
-                    function (error, stdout, stderr) {
-                        if (error !== null)
-                            console.log('exec error: ' + error);
-                });
+            if (task.action && task.action == 'copy') {
+                if (task.src && task.dest){
+                    cmd = 'curl ' + config.src + ' --output ' + config.dest;
+                    console.log('Executing: ' + cmd);
+                    exec(cmd, 
+                        function (error, stdout, stderr) {
+                            if (error !== null)
+                                console.log('exec error: ' + error);
+                    });
+                }
             }
-            
-            else
             
             // DATA Command
             // Sets a field in the configuration database
             //
             
-            if (configItem.action && configItem.action == 'data'){
-             
-                var isNew = false;
-                record = Config.find({domain: configItem.domain});
-                if (record.count() == 0)
-                    isNew = true;
-                
-                
-                configurationRecord[configItem.field] = 
-                    configurationRecord[configItem.value];
+            if (task.action && task.action == 'data'){
+                if (task.key && task.value){
                     
+                    var isNew = false;
+                    var updateObject = {};
+                    record = Config.find({domain: task.domain});
+                    if (record.count() == 0) {
+                        // initializing this domain
+                        updateObject.domain = task.domain;
+                        updateObject[task.key] = task.value;
+                        Config.insert(updateObject);
+                    } else {
+                        // updating this domain
+                        updateObject[task.key] = {" $set": "value" }
+                        Config.update({'domain': task.domain}, updateObject);
+                    }
+                
+                }                    
             }
+              
+            // INSTALL Command
+            // yum installs a package over the network
+            //
             
-            else
+            if (task.action && task.action == 'install'){
+                if (task.pkg) {
+                    cmd = 'yum install ' + task.pkg;
+                    console.log('Executing: ' + cmd);
+                    exec(cmd, 
+                        function (error, stdout, stderr) {
+                            if (error !== null)
+                                console.log('exec error: ' + error);
+                         }
+                    );
+                }
+            }
+
+            // PULL_UPDATE Command
+            // uses git pull to update the server code
+            //
             
-            if (configItem.action && configItem.action == 'install'){
-             
-                cmd = 'yum install ' + configItem.pkg;
-                console.log('Executing: ' + cmd);
-                exec(cmd, 
+            if (task.action && task.action == 'pull_update'){
+                console.log('Executing git pull to update server code');
+                exec('git pull', {cwd: INSTALL_DIR},
                     function (error, stdout, stderr) {
-                        if (error !== null)
-                            console.log('exec error: ' + error);
-                });
+                            if (error !== null)
+                                console.log('exec error: ' + error);
+                         }
+                    );
             }
-        
+            
+            
         }
     
-        return; 
+        // We have an issue here: if an async exec process fails
+        // we are not notified, and the update is persisted as 
+        // successful
+        // TODO: Look at making it async using a Fiber
+        
+        Updates.insert(configurationObject);
+        return ('Update applied'); 
     }
 });
 
