@@ -1,5 +1,5 @@
-exec = __meteor_bootstrap__.require('util').exec;
-spawn = __meteor_bootstrap__.require('util').spawn;
+exec = __meteor_bootstrap__.require('child_process').exec;
+spawn = __meteor_bootstrap__.require('child_process').spawn;
 
 Meteor.startup(function () {
     Config = new Meteor.Collection("Configuration");
@@ -17,7 +17,7 @@ Meteor.startup(function () {
     // 1. See if we can pass a configuration object directly via REST from the installation script
     // to avoid having this url in the code
     // 2. Put a sane default URL in here for a public use case
-    
+        console.log('Performing initial system configuration');
         DEFAULT_CONFIG_URL = 'http://deathstar1.usersys.redhat.com/deathstar-setup.json';
         Meteor.call('updateFromURL', DEFAULT_CONFIG_URL);          
     }
@@ -29,11 +29,13 @@ Meteor.methods({
         var result = Meteor.http.get(url);
         if (result.statusCode === 200)
             if (result.data)
-                return(Meteor.call('processConfigurationObject', result.data));
+                Meteor.call('processConfigurationObject', result.data);
                 
     },
     processConfigurationObject: function (configurationObject){
       
+        console.log('Processing configuration commands:');
+        console.log(configurationObject);
         /* The Configuration Object looks like this:
         {
             human_readable_task_name_1:
@@ -60,9 +62,9 @@ Meteor.methods({
         to resolve the PressGang servers that it will use
         */
         
-        var cmd;
-        for (configItem in appconfig.items){
-            
+        var cmd, configItem;
+        for (item in configurationObject){
+            configItem = configurationObject[item];
             //  COPY Command
             //
             // Download a static file to the filesystem
