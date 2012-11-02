@@ -134,7 +134,7 @@ Meteor.methods({
                     if (task.src && task.dest) {
                         if (dryrun) console.log( '' + numerator + '. ' + item +
                             '\nCopy ' + task.src + ' to ' + task.dest + '\n');
-                        if (!dryrun) Meteor.call('installFile', task.src, task.dest);       
+                        if (!dryrun) Meteor.call('copyFile', task.src, task.dest);       
                         numerator ++;
                     }
                 }
@@ -240,8 +240,8 @@ Meteor.methods({
     
     // Method exposed to allow rapid prototyping and troubleshooting in the field
     // Should be protected in a production model
-    installFile: function (src, dest) {
-        cmd = 'curl ' + config.src + ' --output ' + config.dest;
+    copyFile: function (src, dest) {
+        cmd = 'curl ' + src + ' --output ' + dest;
         console.log('Executing: ' + cmd);
         exec(cmd, 
             function (error, stdout, stderr) {
