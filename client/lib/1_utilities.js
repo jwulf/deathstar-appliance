@@ -47,8 +47,8 @@ function QueryStringToJSON(href) {
           }
       } else {
           stack[name] = value;
-      }
-  }
+      } 
+  } 
   return stack;
 }
 

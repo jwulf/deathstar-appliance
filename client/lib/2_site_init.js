@@ -38,7 +38,7 @@ if (site_prefs) {
     var content;
     CONTENT_PATH = CONTENT_PATH + ".json";
     console.log("looking for " + CONTENT_PATH)
-
+  
     $.ajax({
         url: CONTENT_PATH,
         dataType: 'json',

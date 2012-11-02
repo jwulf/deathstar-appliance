@@ -2,6 +2,7 @@ exec = __meteor_bootstrap__.require('child_process').exec;
 spawn = __meteor_bootstrap__.require('child_process').spawn;
 
 INSTALL_DIR = '/opt/deathstar-appliance';
+CONFIG_URL = '/config/configurationURL.json';
 
 Meteor.startup(function () {
 
@@ -17,13 +18,12 @@ Meteor.startup(function () {
 
     // Get the configuration object, then parse it
     
-    // TODO: 
-    // 1. See if we can pass a configuration object directly via REST from the installation script
-    // to avoid having this url in the code
-    // 2. Put a sane default URL in here for a public use case
         console.log('Performing initial system configuration');
         DEFAULT_CONFIG_URL = 'http://deathstar1.usersys.redhat.com/deathstar-setup.json';
-        Meteor.call('updateFromURL', DEFAULT_CONFIG_URL);          
+        configurationInformation = Meteor.http.get(CONFIG_URL);
+        if (configurationInformation.statusCode === 200)
+            if (configurationInformation.data.url)
+                Meteor.call('updateFromURL', configurationInformation.data.url + '/initialize.json');          
     }
 });
 
@@ -97,13 +97,7 @@ Meteor.methods({
             
             if (task.action && task.action == 'copy') {
                 if (task.src && task.dest){
-                    cmd = 'curl ' + config.src + ' --output ' + config.dest;
-                    console.log('Executing: ' + cmd);
-                    exec(cmd, 
-                        function (error, stdout, stderr) {
-                            if (error !== null)
-                                console.log('exec error: ' + error);
-                    });
+                    
                 }
             }
             
@@ -136,16 +130,8 @@ Meteor.methods({
             //
             
             if (task.action && task.action == 'install'){
-                if (task.pkg) {
-                    cmd = 'yum install -y ' + task.pkg;
-                    console.log('Executing: ' + cmd);
-                    exec(cmd, 
-                        function (error, stdout, stderr) {
-                            if (error !== null)
-                                console.log('exec error: ' + error);
-                         }
-                    );
-                }
+                if (task.pkg) 
+                    Meteor.call('installPackage',task.pkg);   
             }
 
             // PULL_UPDATE Command
@@ -153,13 +139,7 @@ Meteor.methods({
             //
             
             if (task.action && task.action == 'pull_update'){
-                console.log('Executing git pull to update server code');
-                exec('git pull', {cwd: INSTALL_DIR},
-                    function (error, stdout, stderr) {
-                            if (error !== null)
-                                console.log('exec error: ' + error);
-                         }
-                    );
+                Meteor.call('pullUpdate');
             }
             
             
@@ -172,7 +152,49 @@ Meteor.methods({
         
         Updates.insert(configurationObject);
         return ('Update applied'); 
+    },
+    
+    // Method exposed to allow rapid prototyping and troubleshooting in the field
+    // Should be protected in a production model
+    pullUpdate: function () {
+        console.log('Executing git pull to update server code');
+        exec('git pull', {cwd: INSTALL_DIR},
+            function (error, stdout, stderr) {
+                    if (error !== null)
+                        console.log('exec error: ' + error);
+                 }
+            );
+        
+    },
+    
+    // Method exposed to allow rapid prototyping and troubleshooting in the field
+    // Should be protected in a production model
+    installPackage: function (pkgURL) {
+        var cmd = 'yum install -y ' + pkgURL;
+        console.log('Executing: ' + cmd);
+        exec(cmd, 
+            function (error, stdout, stderr) {
+                if (error !== null)
+                    console.log('exec error: ' + error);
+             }
+        );   
+    },
+    
+    // Method exposed to allow rapid prototyping and troubleshooting in the field
+    // Should be protected in a production model
+    installFile: function (src, dest) {
+        cmd = 'curl ' + config.src + ' --output ' + config.dest;
+        console.log('Executing: ' + cmd);
+        exec(cmd, 
+            function (error, stdout, stderr) {
+                if (error !== null)
+                    console.log('exec error: ' + error);
+        });
     }
+    
+    
+    
+    
 });
 
 
