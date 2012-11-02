@@ -16,7 +16,8 @@ console.log("initiating main page controller")
 
 Template.page_controller.display_page = function () {
     console.log("Loading page template for " + page_id)
-    return Template[page_id]();
+    if (Template[page_id])
+        return Template[page_id]();
 };
 
 Template.page_controller.isConfigured = function () {

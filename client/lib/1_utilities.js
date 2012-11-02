@@ -10,9 +10,6 @@
 /////////////////////////////////////////////////////
 console.log("initiating utilities")
 
-
-
-
 /////////////////////////////////////////////////////
 // URL Parsing Functions                           //
 /////////////////////////////////////////////////////
@@ -70,11 +67,15 @@ function checkURLInWorkflow() {
     applicationState = Session.get('applicationState');
     console.log("Checking to see if " + page_id + " is in workflow: " + !(_.isUndefined(workflows[applicationState][page_id])));
     
+    // Special call to initialize the machine from a remote configuration object
     if ( URL_PATHNAME == '/initialize' && parameters.from )
         Meteor.call('updateFromURL', parameters.from);
 
-    // Currently requested path does not exist in workflow
+    if (URL_PATHNAME.substring(0, 7) == '/public') return true;
+
     if (_.isUndefined(workflows[applicationState][page_id])) {
+        // Currently requested path does not exist in workflow
+
         // check for a workflow fallback url
         // The application state must be set, there has to be a workflow for this application state, 
         // and that application state must have a fallback for this to fire
@@ -96,6 +97,7 @@ function checkURLInWorkflow() {
         if (_.isUndefined(Template[page_id])) 
             var message_404 = 'Path is valid but page template is missing (&lt;template name="' + page_id + '.html"&gt;).';
     }
+    
     return true;
 }
 

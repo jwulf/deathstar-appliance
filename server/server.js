@@ -7,46 +7,60 @@ CONFIG_URL = '/config/configurationURL.json';
 Meteor.startup(function () {
 
     Config = new Meteor.Collection("Configuration");
-    Updates = new Meteor.Collection("Updates");
+    InstalledUpdates = new Meteor.Collection("InstalledUpdates");
+    AvailableUpdates = new Meteor.Collection("AvailableUpdates");
 
 // appliance configuration is system-level files and database fields containing
 // URLS and other site-specific configuration data
-    var applianceConfig = Config.find({configurationDomain: 'appliance'});
-   
-// On initial startup there is no appliance configuration in the database   
-   if (applianceConfig.count() == 0) {
 
-    // Get the configuration object, then parse it
-    
-        console.log('Performing initial system configuration');
-        
-        try {
-            configurationInformation = Meteor.http.get(CONFIG_URL);
-            if (configurationInformation.statusCode === 200)
-                if (configurationInformation.data.url && configuration.data.url !== '')
-                    Meteor.call('updateFromURL', configurationInformation.data.url + '/initialize.json');         
-        }
-        catch (e)
-        {
-            console.log('Problem retrieving initial configuration:');
-            console.log(e);
-        }
-    }
-});
+});   
 
 Meteor.methods({
-    
+        
+    // Method exposed to allow rapid prototyping and troubleshooting in the field
+    // Should be protected in a production model
     updateFromURL: function(url){
+        var result, resultJSON;
+        console.log( 'Fetching update from ' + url );
         var result = Meteor.http.get(url);
         if (result.statusCode === 200)
-            if (result.data)
-                Meteor.call('processConfigurationObject', result.data);
-                
+            console.log('Got a result');
+            if ( result.data ) {
+                console.log('Response is JSON-encoded data');
+                resultJSON = result.data;
+            } else {
+                // Hack casting string to JSON object
+                // allows to serve configuration object from svn over http
+                if ( result.content && typeof result.content === String )
+                    // strip line breaks and parse as JSON
+                    console.log('Response is string-encoded data');
+                    var strippedString = result.content.replace(/(\r\n|\n|\r)/gm,"");
+                   // console.log(strippedString);
+                   try { 
+                        resultJSON = JSON.parse(strippedString);
+                   }
+                   catch (e)
+                   {
+                        console.log('Error parsing response object');
+                        return('Error parsing response object');
+                   }
+            }
+            if (resultJSON) {
+                var status = Meteor.call('processConfigurationObject',resultJSON);
+                return(status);
+            }
+        return(result);
     },
+    
     processConfigurationObject: function (configurationObject){
       
+        const CMD_INSTALL_PACKAGE = 'install package';;
+        const CMD_COPY_FILE = 'copy file';
+        const CMD_PULL_UPDATE = 'pull update';
+        const CMD_DATA = 'data';
+        
         console.log('Processing configuration commands:');
-        console.log(configurationObject);
+        //console.log(configurationObject);
         
         /* The Configuration Object looks like this:
         {
@@ -54,11 +68,13 @@ Meteor.methods({
             
             uuid: UUID, // used to tell if it has been applied or not
             
+            "dry run only": true // optional: if true, will parse but not execute 
+            
             tasks: {
                 
                 human_readable_task_name_1:
                 {
-                    "action": "copy",
+                    "action": "copy file",
                     "src": "http://someurl/somefile",
                     "dest": "/local/file/path"
                 },
@@ -71,12 +87,12 @@ Meteor.methods({
                 },
                 human_readable_task_name_3:
                 {
-                    "action": "install",
+                    "action": "install package",
                     "package": "http://someurl/somepkg.rpm"
                 }, 
                 human_readable_task_name_4:
                 {
-                    "action": "pull_update"
+                    "action": "pull update"
                 }
             }
         }
@@ -85,80 +101,114 @@ Meteor.methods({
         to resolve the PressGang servers that it will use
         */
         
-        // TODO: Parse each task to make sure that it has all the request pieces
-        // A malformed update object could crash this process
-        
-        if (Updates.find({id: configurationObject.uuid}).count > 0 ){
-            console.log("Update has already been applied");
-            return('Update has already been applied');
+        // We do at least a dry run to log the tasks to the console
+        // and then a real thing, unless the object specifies dryrun: true
+        var dryrun = true;
+        var passes = 2;
+        if (configurationObject['dry run only']) {
+            passes = 1;
+            console.log('Dry run only');
         }
+        
+        for (var i = 0; i < passes; i ++)
+        {
             
-        var cmd, task;
-        for (item in configurationObject.tasks){
-            task= configurationObject.tasks[item];
-            
-            //  COPY Command
-            //
-            // Download a static file to the filesystem
-            //
-            
-            if (task.action && task.action == 'copy') {
-                if (task.src && task.dest){
-                    
+            if (InstalledUpdates.find({uuid: configurationObject.uuid}).count > 0 ){
+                console.log("This update has already been applied to this system");
+                if (!dryrun)
+                    return('Update has already been applied');
+            }
+              
+            if (dryrun) console.log('Tasks:');
+              
+            var cmd, task, numerator = 1;
+            for (item in configurationObject.tasks){
+                task = configurationObject.tasks[item];
+                
+                //  
+                // copyFile
+                // Download a static file to the filesystem
+                //
+                
+                if (task.action && task.action == CMD_COPY_FILE) {
+                    if (task.src && task.dest) {
+                        if (dryrun) console.log( '' + numerator + '. ' + item +
+                            '\nCopy ' + task.src + ' to ' + task.dest + '\n');
+                        if (!dryrun) Meteor.call('installFile', task.src, task.dest);       
+                        numerator ++;
+                    }
+                }
+                
+                //
+                // data
+                // Sets a field in the configuration database
+                //
+                
+                if (task.action && task.action == CMD_DATA){
+                    if (task.key && task.value) {
+                        
+                        if (dryrun) console.log('' + numerator + '. ' + item + 
+                            '\nSet ' + task.domain + 
+                            ':' + task.key + ' to ' + task.value + '\n');
+                        numerator ++;
+                        if (!dryrun) {
+                            var isNew = false;
+                            var updateObject = {};
+                            record = Config.find({domain: task.domain});
+                            if (record.count() == 0) {
+                                // initializing this domain
+                                updateObject.domain = task.domain;
+                                updateObject[task.key] = task.value;
+                                Config.insert(updateObject);
+                            } else {
+                                // updating this domain
+                                updateObject[task.key] = {" $set": "value" }
+                                Config.update({'domain': task.domain}, updateObject);
+                            }
+                        }                    
+                    }                    
+                }
+                  
+                //
+                // installPackage 
+                // yum installs a package over the network
+                //
+                
+                if (task.action && task.action == CMD_INSTALL_PACKAGE){
+                    if (task.pkg) {
+                        if (dryrun) console.log('' + numerator + '. ' + item + 
+                            '\nInstall Package: ' + task.pkg + '\n');
+                        if (!dryrun)
+                            Meteor.call('installPackage',task.pkg);   
+                        numerator ++;
+                    }
+                }
+    
+                //
+                // pullUpdate
+                // uses git pull to update the server code
+                //
+                
+                if (task.action && task.action == CMD_PULL_UPDATE){
+                    if (dryrun) console.log('' + numerator + '. ' + '\nPull Git update\n');
+                    if (!dryrun) Meteor.call('pullUpdate');
+                    numerator ++;
                 }
             }
             
-            // DATA Command
-            // Sets a field in the configuration database
-            //
-            
-            if (task.action && task.action == 'data'){
-                if (task.key && task.value){
-                    
-                    var isNew = false;
-                    var updateObject = {};
-                    record = Config.find({domain: task.domain});
-                    if (record.count() == 0) {
-                        // initializing this domain
-                        updateObject.domain = task.domain;
-                        updateObject[task.key] = task.value;
-                        Config.insert(updateObject);
-                    } else {
-                        // updating this domain
-                        updateObject[task.key] = {" $set": "value" }
-                        Config.update({'domain': task.domain}, updateObject);
-                    }
-                
-                }                    
-            }
-              
-            // INSTALL Command
-            // yum installs a package over the network
-            //
-            
-            if (task.action && task.action == 'install'){
-                if (task.pkg) 
-                    Meteor.call('installPackage',task.pkg);   
-            }
-
-            // PULL_UPDATE Command
-            // uses git pull to update the server code
-            //
-            
-            if (task.action && task.action == 'pull_update'){
-                Meteor.call('pullUpdate');
-            }
-            
+            dryrun = false;
             
         }
-    
+        
         // We have an issue here: if an async exec process fails
         // we are not notified, and the update is persisted as 
         // successful
         // TODO: Look at making it async using a Fiber
         
-        Updates.insert(configurationObject);
-        return ('Update applied'); 
+        if ( !dryrun ) {
+            InstalledUpdates.insert(configurationObject);
+            return ('Update applied'); 
+        }
     },
     
     // Method exposed to allow rapid prototyping and troubleshooting in the field

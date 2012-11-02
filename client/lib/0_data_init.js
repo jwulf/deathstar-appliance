@@ -9,16 +9,17 @@
 OPERATING_IN = ['production', 'play'];
 
 
-// Check for the CSProcessor configuration data
+// Check for the configuration data
 // If it doesn't exist, we haven't been configured yet, and we'll
 // set Session.isConfigured to false
 // This will trigger the welcome wizard
-var csprocessorConfig = Config.find({configurationDomain: 'csprocessor'}).fetch();
-Session.set('applicationState', (csprocessorConfig == true ? 'configured' : 'unconfigured'));
+var configuration = Config.find({}).fetch();
+
+Session.set('applicationState', (configuration == true ? 'configured' : 'unconfigured'));
 
 // Get the system config. This lets us know what state we're in - production or 
 // playing
-var systemConfig = Config.find({configurationDomain: 'system'}).fetch();
+var systemConfig = Config.find({domain: 'system'}).fetch();
 if (systemConfig) {
     Session.set('productionState',  systemConfig.productionState);
 }
