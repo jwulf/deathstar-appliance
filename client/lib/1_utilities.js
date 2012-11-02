@@ -54,7 +54,7 @@ function QueryStringToJSON(href) {
 
 function URLPathToTemplateID(url_path) {
     if ( url_path === '/' ) return 'index.html';
-    if ( url_path.substring(0,1) == '/') return url_path.substring(1, url_path.length());
+    if ( url_path.substring(0,1) == '/') return url_path.substring(1, url_path.length);
     return url_path;
 }
 
