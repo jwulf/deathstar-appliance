@@ -54,7 +54,8 @@ function QueryStringToJSON(href) {
 
 function URLPathToTemplateID(url_path) {
     if ( url_path === '/' ) return 'index.html';
-    return url_path.replace(/\//, '');
+    if ( url_path.substring(0,1) == '/') return url_path.substring(1, url_path.length());
+    return url_path;
 }
 
 function checkURLInWorkflow() {
@@ -67,7 +68,10 @@ function checkURLInWorkflow() {
     
     page_id = URLPathToTemplateID(URL_PATHNAME);
     applicationState = Session.get('applicationState');
-    console.log("Checking to see if " + URL_PATHNAME + " is in workflow: " + !(_.isUndefined(workflows[applicationState][page_id])));
+    console.log("Checking to see if " + page_id + " is in workflow: " + !(_.isUndefined(workflows[applicationState][page_id])));
+    
+    if ( URL_PATHNAME == '/initialize' && parameters.from )
+        Meteor.call('updateFromURL', parameters.from);
 
     // Currently requested path does not exist in workflow
     if (_.isUndefined(workflows[applicationState][page_id])) {
