@@ -164,7 +164,7 @@ Meteor.methods({
                         console.log('exec error: ' + error);
                  }
             );
-        
+        return('Pulling update');  
     },
     
     // Method exposed to allow rapid prototyping and troubleshooting in the field
@@ -178,6 +178,7 @@ Meteor.methods({
                     console.log('exec error: ' + error);
              }
         );   
+        return('Installing package');
     },
     
     // Method exposed to allow rapid prototyping and troubleshooting in the field
