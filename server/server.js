@@ -29,7 +29,7 @@ Meteor.methods({
         var result = Meteor.http.get(url);
         if (result.statusCode === 200)
             if (result.data)
-                return(processConfigurationObject(result.data));
+                return(Meteor.call('processConfigurationObject', result.data));
                 
     },
     processConfigurationObject: function (configurationObject){
