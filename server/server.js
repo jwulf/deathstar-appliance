@@ -26,9 +26,10 @@ Meteor.startup(function () {
                 if (configurationInformation.data.url && configuration.data.url !== '')
                     Meteor.call('updateFromURL', configurationInformation.data.url + '/initialize.json');         
         }
-        catch
+        catch (e)
         {
-            console.log('Problem retrieving initial configuration');
+            console.log('Problem retrieving initial configuration:');
+            console.log(e);
         }
     }
 });
