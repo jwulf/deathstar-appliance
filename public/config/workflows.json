@@ -12,7 +12,8 @@
             "enable_play" : "1",
             "enable_production" : "1",
             "deathstar_description" : "1",
-            "fallback" : "index"
+            "fallback" : "index", 
+            "public/log" : "1"
             } , 
     "unconfigured" : { 
             "welcome" : "1", 
@@ -21,7 +22,8 @@
             "enable_play" : "1",
             "enable_production" : "1",
             "deathstar_description" : "1",
-            "fallback" : "welcome" 
+            "fallback" : "welcome" ,
+            "public/log" : "1"
             }  
 } 
 
