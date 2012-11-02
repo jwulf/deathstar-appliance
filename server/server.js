@@ -19,11 +19,17 @@ Meteor.startup(function () {
     // Get the configuration object, then parse it
     
         console.log('Performing initial system configuration');
-        DEFAULT_CONFIG_URL = 'http://deathstar1.usersys.redhat.com/deathstar-setup.json';
-        configurationInformation = Meteor.http.get(CONFIG_URL);
-        if (configurationInformation.statusCode === 200)
-            if (configurationInformation.data.url)
-                Meteor.call('updateFromURL', configurationInformation.data.url + '/initialize.json');          
+        
+        try {
+            configurationInformation = Meteor.http.get(CONFIG_URL);
+            if (configurationInformation.statusCode === 200)
+                if (configurationInformation.data.url && configuration.data.url !== '')
+                    Meteor.call('updateFromURL', configurationInformation.data.url + '/initialize.json');         
+        }
+        catch
+        {
+            console.log('Problem retrieving initial configuration');
+        }
     }
 });
 
