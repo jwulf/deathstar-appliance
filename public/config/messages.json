@@ -34,7 +34,7 @@
     "text_init_config_intro_message" : "We need to configure the system before you can use it.</p><p>I can configure this system for <span class='text-success'><strong>Learning</strong></span> or for <span class='text-error'><strong>Production</strong></span> use.",
     "text_init_config_postscript" : "Don't worry: you can change it any time later.",
     "welcome_to_the_dark_side" : "Welcome to the Dark Side. This Death Star is now operational.", 
-    "title_page_deathstar_description" : "The Death Star",
-    "text_deathstar_description_intro" : "A <em>topic-based authoring in the browser</em> appliance / hosted service",
-    "text_deathstar_description" : "<p class=\"lead\">This is a black box virtual appliance for topic-based authoring in the browser.</p><p class=\"lead\">It has lots of robots who do things in the background, leaving you to focus on creating content.</p><p>It is based on the following technologies:</p><ul><li><a href=\"https://fedorahosted.org/publican/\">Publican</a></li><li><a href=\"https://github.com/lnewson/csprocessor\">CSProcessor</a></li><li><a href=\"https://github.com/mcasperson\">PressGang Component Content Management System</a></li><li><a href=\"http://www.nodejs.org\">Node.js</a></li><li><a href=\"http://www.meteor.com\">Meteor</a></li></ul> "
+    "title_page_deathstar_description" : "Death Star (in a Box)",
+    "text_deathstar_description_intro" : "Topic-based authoring in the browser appliance",
+    "text_deathstar_description" : "<p class=\"lead\">A black box virtual appliance for <strong>topic-based authoring in the browser</strong>.</p><p class=\"lead\">It has lots of robots who do things that robots can do, leaving you to focus on creating content.</p><p>Under the Hood:</p><ul><li><a href=\"https://fedorahosted.org/publican/\">Publican</a></li><li><a href=\"https://github.com/lnewson/csprocessor\">CSProcessor</a></li><li><a href=\"https://github.com/mcasperson\">PressGang Component Content Management System</a></li><li><a href=\"http://www.nodejs.org\">Node.js</a></li><li><a href=\"http://www.meteor.com\">Meteor</a></li></ul> "
 }
