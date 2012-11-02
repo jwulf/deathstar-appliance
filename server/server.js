@@ -19,7 +19,7 @@ Meteor.methods({
         
     // Method exposed to allow rapid prototyping and troubleshooting in the field
     // Should be protected in a production model
-    updateFromURL: function(url){
+    updateFromURL: function(url, req_dryrun){
         var result, resultJSON;
         console.log( 'Fetching update from ' + url );
         var result = Meteor.http.get(url);
@@ -46,13 +46,13 @@ Meteor.methods({
                    }
             }
             if (resultJSON) {
-                var status = Meteor.call('processConfigurationObject',resultJSON);
+                var status = Meteor.call('processConfigurationObject',resultJSON, req_dryrun);
                 return(status);
             }
         return(result);
     },
     
-    processConfigurationObject: function (configurationObject){
+    processConfigurationObject: function (configurationObject, req_dryrun){
       
         const CMD_INSTALL_PACKAGE = 'install package';;
         const CMD_COPY_FILE = 'copy file';
@@ -241,7 +241,7 @@ Meteor.methods({
     // Method exposed to allow rapid prototyping and troubleshooting in the field
     // Should be protected in a production model
     copyFile: function (src, dest) {
-        cmd = 'curl ' + src + ' --output ' + dest;
+        cmd = 'curl ' + src + ' --insecure --output ' + dest;
         console.log('Executing: ' + cmd);
         exec(cmd, 
             function (error, stdout, stderr) {
