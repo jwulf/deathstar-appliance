@@ -137,7 +137,7 @@ Meteor.methods({
             
             if (task.action && task.action == 'install'){
                 if (task.pkg) {
-                    cmd = 'yum install ' + task.pkg;
+                    cmd = 'yum install -y ' + task.pkg;
                     console.log('Executing: ' + cmd);
                     exec(cmd, 
                         function (error, stdout, stderr) {
