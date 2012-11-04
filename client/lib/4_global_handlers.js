@@ -90,8 +90,13 @@ Handlebars.registerHelper('editable', function() {
 Handlebars.registerHelper('button', function(textkey, className) {
 	var msg = getMsg(textkey, "")
 	var url = eval("content."+textkey+"_url");
-	if(!url){url = textkey}
-	var result = '<a href="' + url + '" class="'+className+'">' + msg + '</a>';
+    var js = eval("content."+textkey+"_js");
+    if (!js) {
+    	if(!url){url = textkey}
+    	var result = '<a href="' + url + '" class="'+className+' deathstar-navlink"->' + msg + '</a>';
+    } else {
+        var result = '<a href="javascript:void(0);" onclick="' + js + '" class="'+className+' deathstar-navlink"->' + msg + '</a>';
+    }
   	return result;
 });
 
@@ -103,6 +108,8 @@ Handlebars.registerHelper('isAppConfigured', function() {
 Handlebars.registerHelper('getApplicationState', function() {
     return Session.get('applicationState');    
 });
+
+
 
 // Handler for linked msg using content object
 // TODO this needs some work.. need to test

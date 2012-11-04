@@ -15,9 +15,16 @@ console.log("initiating main page controller")
 
 
 Template.page_controller.display_page = function () {
-    console.log("Loading page template for " + page_id)
-    if (Template[page_id])
-        return Template[page_id]();
+    var page = Session.get('page_id');
+    if (Template[page]){
+        console.log("Loading page template for " + page);
+        return Template[page]()
+    }
+    else
+    {
+        console.log("Page template for " + page + ' not found');
+        return Template['page_404']();
+    }
 };
 
 Template.page_controller.isConfigured = function () {
@@ -28,14 +35,31 @@ Template.page_controller.welcome = function () {
     return Template['welcome']();   
 }
 
-/*
 Template.page_controller.events = {
-  'click input.inc': function () {
-    Players.update(Session.get("selected_player"), {$inc: {score: 5}});
+  'click .deathstar-navlink': function (event) {
+        // prevent default browser link click behaviour
+        event.preventDefault();
+        
+        // get the path from the link      
+        var link = event.currentTarget.href;
+    	var reg = /.+?\:\/\/.+?(\/.+?)(?:#|\?|$)/;
+    	extracted = reg.exec(link);
+
+        // this blows up if given
+        // <a href="/"></a> - so, workaround:
+
+        if (extracted)
+        {
+            pathname = reg.exec(link)[1];
+        } else {
+            pathname = 'index';
+        }
+        
+        Router.navigate(pathname, true);
+    	// set the session variable
+//    	Session.set('page_id', pathname.substring(1, pathname.length));
   }
 };
-*/
-
 // populate the zones
 
 

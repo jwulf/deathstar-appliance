@@ -1,0 +1,63 @@
+<template name="initializing">
+    {{> module_masthead}}
+    
+        <div class="container-fluid main">
+        <div class="row span10 offset1">
+            <div>
+                {{>module_page_title}}
+                <div>
+                    <p>{{{msg "msg_initializing_text"}}}</p>
+                </div>
+            </div>
+            <div class="span9">
+                <div class="row">
+                    <div class="span5 alert alert-block fade in {{message_class}}">
+                        <h4 class="alert-heading">{{status_title}}</h4>
+                        <p>{{message}}</p>              
+                        {{#if initializing_success}}
+                        <p>{{{msg "msg_initializing_success_recommendation"}}}</p>
+                        <p>{{{button "button_initialization_success" "btn-block btn span3 btn-success"}}}</p>
+                        {{/if}}
+                        {{#if initializing_error}}
+                        <p>{{{msg "msg_initializing_fail_recommendation"}}}</p>
+                        <p class="span3">{{{button "button_initialization_error" "btn-block btn span3 btn-danger "}}}</p>
+                        {{/if}}
+                    </div> 
+                </div>
+            </div>
+            <div class="span9">
+                <div class="row">
+                    <div class="accordion span9" id="accordion2" >
+                        <div class="accordion-group">
+                            <div class="accordion-heading">
+                                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+                                    {{{msg "title_configuration_details"}}}
+                                </a>
+                            </div>
+                            <div id="collapseOne" class="accordion-body collapse">
+                                <div class="accordion-inner">
+                                    {{{iterateConfig}}}
+                                </div>
+                            </div>
+                        </div>
+                        {{#if got_initialization_details}}
+                        <div class="accordion-group">
+                            <div class="accordion-heading">
+                                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
+                                    {{{msg "title_initialization_details"}}}
+                                </a>
+                            </div>
+                            <div id="collapseTwo" class="accordion-body collapse">
+                                <div class="accordion-inner">
+                                    {{{iterateInitDetails}}}
+                                </div>
+                            </div>
+                        </div>
+                        {{/if}}
+                    </div>
+                </div>
+          </div>
+       </div>
+    </div>
+</template>
+

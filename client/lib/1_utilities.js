@@ -49,11 +49,48 @@ function QueryStringToJSON(href) {
   return stack;
 }
 
+function humanDate() {
+    var date = new Date();
+    var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];  
+    var months = ["January", "February", "March", "April", "May",   
+        "June", "July", "August", "September", "October", "November", "December"];  
+    var pad = function(str) { str = String(str); return (str.length < 2) ? "0" + str : str; }  
+  
+    var meridian = (parseInt(date.getHours() / 12) == 1) ? 'PM' : 'AM';  
+    var hours = date.getHours() > 12 ? date.getHours() - 12 : date.getHours();  
+    return days[date.getDay()] + ' ' + months[date.getMonth()] + ' ' + date.getDate() + ' '   
+        + date.getFullYear() + ' ' + hours + ':' + pad(date.getMinutes()) + ':'   
+        + pad(date.getSeconds()) + ' ' + meridian;  
+}  
+
 function URLPathToTemplateID(url_path) {
     if ( url_path === '/' ) return 'index.html';
     if ( url_path.substring(0,1) == '/') return url_path.substring(1, url_path.length);
     return url_path;
 }
+
+function getValidURLinWorkflow(url) {
+    
+    var page_id = URLPathToTemplateID(url);
+    var applicationState = Session.get('applicationState');
+    
+    // No application state
+    if (_.isUndefined(applicationState)) return url;
+    
+    // No workflow defined for this application state
+    if (_.isUndefined(workflows[applicationState])) return url;
+    
+    // This URL is in the workflow
+    if (! _.isUndefined(workflows[applicationState][page_id])) return url;
+    
+    // Use the fallback URL for the workflow
+    if (workflows[applicationState].fallback) 
+        return workflows[applicationState].fallback;
+    
+    // When all else fails
+    return 'index';
+}
+
 
 function checkURLInWorkflow() {
 
@@ -67,11 +104,7 @@ function checkURLInWorkflow() {
     applicationState = Session.get('applicationState');
     console.log("Checking to see if " + page_id + " is in workflow: " + !(_.isUndefined(workflows[applicationState][page_id])));
     
-    // Special call to initialize the machine from a remote configuration object
-    if ( URL_PATHNAME == '/initialize' && parameters.from )
-        Meteor.call('updateFromURL', parameters.from);
 
-    if (URL_PATHNAME.substring(0, 7) == '/public') return true;
 
     if (_.isUndefined(workflows[applicationState][page_id])) {
         // Currently requested path does not exist in workflow
@@ -101,3 +134,23 @@ function checkURLInWorkflow() {
     return true;
 }
 
+function doInitialization(){
+    Session.set('initializationState', 'initializing');
+    Session.set('initializationMessage', 'Performing Initialization...');
+
+    Meteor.call('initialize', Session.get('initializationURL'), 
+        function initializationCallback(err, result){
+        Session.set('initializationState', 'complete');
+        if (result.error) {
+            // false means success, 2 means already configured
+            state = 'error';
+            if ( result.error == 2 ) state = 'already_configured';
+            Session.set('initializationState', state);
+        }
+        if (result.msg)
+            Session.set('initializationMessage', result.msg);
+        if (result.result)
+            Session.set('initializationResult', result.result);
+        });
+   
+}
