@@ -15,7 +15,7 @@ Meteor.startup(function () {
     
     // means we can distribute the VM with the code at any rev
     // and rely on it starting with the latest version 
-    if (Config.find({}).count() = 0)
+    if (Config.find({}).count() === 0)
         pullUpdate();
 
 });   
