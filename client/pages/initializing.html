@@ -15,8 +15,11 @@
                         <h4 class="alert-heading">{{status_title}}</h4>
                         <p>{{message}}</p>              
                         {{#if initializing_success}}
-                        <p>{{{msg "msg_initializing_success_recommendation"}}}</p>
-                        <p>{{{button "button_initialization_success" "btn-block btn span3 deathstar-navlink btn-success"}}}</p>
+                            {{#if postmessage}}
+                                <p>{{{postmessage_text}}}</p>
+                            {{/if}}
+                            <p>{{{msg "msg_initializing_success_recommendation"}}}</p>
+                            <p>{{{button "button_initialization_success" "btn-block btn span3 deathstar-navlink btn-success"}}}</p>
                         {{/if}}
                         {{#if initializing_error}}
                         <p>{{{msg "msg_initializing_fail_recommendation"}}}</p>

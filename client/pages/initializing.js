@@ -28,6 +28,16 @@ Template.initializing.configuration = function () {
     return Config.find({}).fetch();
 }
 
+Template.initializing.postmessage_text = function () {
+    var initDetails = Session.get('initializationResult');
+    return (initDetails.originalJSON.postmessage);    
+}
+
+Handlebars.registerHelper('postmessage', function () {
+    var initDetails = Session.get('initializationResult');    
+    return (initDetails.originalJSON && initDetails.originalJSON.postmessage);
+});
+    
 Handlebars.registerHelper('initializing_success',  function () {
     var status = Session.get('initializationState');
     return ( ( status === 'complete') || 
