@@ -9,6 +9,7 @@ Meteor.startup(function () {
     Config = new Meteor.Collection("Configuration");
     InstalledUpdates = new Meteor.Collection("InstalledUpdates");
     AvailableUpdates = new Meteor.Collection("AvailableUpdates");
+    pullUpdate();
 
 // appliance configuration is system-level files and database fields containing
 // URLS and other site-specific configuration data
@@ -23,6 +24,10 @@ function updateFromURL(url) {
 function processConfigurationObject( resultJSON, req_dryrun) {
     // Stub function
     return Meteor.call('processConfigurationObject', resultJSON, req_dryrun);
+}
+
+function pullUpdate(){
+    Meteor.call('pullUpdate');   
 }
 
 Meteor.methods({
