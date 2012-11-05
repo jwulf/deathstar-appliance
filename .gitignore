@@ -1,2 +1,4 @@
 .meteor/lib/db
 *.*~
+.settings
+.c9revisions
