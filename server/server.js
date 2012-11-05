@@ -9,10 +9,14 @@ Meteor.startup(function () {
     Config = new Meteor.Collection("Configuration");
     InstalledUpdates = new Meteor.Collection("InstalledUpdates");
     AvailableUpdates = new Meteor.Collection("AvailableUpdates");
-    pullUpdate();
-
-// appliance configuration is system-level files and database fields containing
-// URLS and other site-specific configuration data
+    
+    // If this machine has not been initialized
+    // immediately pull a git update to patch it to the latest stable version
+    
+    // means we can distribute the VM with the code at any rev
+    // and rely on it starting with the latest version 
+    if (Config.find({}).count() = 0)
+        pullUpdate();
 
 });   
 
