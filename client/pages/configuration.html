@@ -1,0 +1,40 @@
+<template name="configuration">
+    {{> module_masthead}}
+    
+    <div class="container-fluid main">
+        <div class="row span10 offset1">
+            <div class="span9">
+                <div class="row">
+                    <div class="accordion span9" id="accordion2" >
+                        <div class="accordion-group">
+                            <div class="accordion-heading">
+                                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+                                    {{{msg "title_configuration_details"}}}
+                                </a>
+                            </div>
+                            <div id="collapseOne" class="accordion-body collapse">
+                                <div class="accordion-inner">
+                                    {{{iterateConfig}}}
+                                </div>
+                            </div>
+                        </div>
+                        {{#if got_initialization_details}}
+                        <div class="accordion-group">
+                            <div class="accordion-heading">
+                                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
+                                    {{{msg "title_initialization_details"}}}
+                                </a>
+                            </div>
+                            <div id="collapseTwo" class="accordion-body collapse">
+                                <div class="accordion-inner">
+                                    {{{iterateInitDetails}}}
+                                </div>
+                            </div>
+                        </div>
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+</template>

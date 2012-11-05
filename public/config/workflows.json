@@ -24,7 +24,8 @@
             "deathstar_description" : "1",
             "fallback" : "welcome" ,
             "public/log" : "1",
-            "initialize": "1"
+            "initialize": "1", 
+            "configuration" : "1"
             }  
 } 
 
