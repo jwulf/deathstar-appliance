@@ -286,6 +286,7 @@ Meteor.methods({
         console.log('Executing git pull to update server code');
         exec('git pull', {cwd: INSTALL_DIR},
             function (error, stdout, stderr) {
+                    console.log(stdout);
                     if (error !== null)
                         console.log('exec error: ' + error);
                  }
