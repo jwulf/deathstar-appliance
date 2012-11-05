@@ -134,7 +134,7 @@ function checkURLInWorkflow() {
     return true;
 }
 
-function doInitialization(){
+function doInitialization(event){
     Session.set('initializationState', 'initializing');
     Session.set('initializationMessage', 'Performing Initialization...');
 

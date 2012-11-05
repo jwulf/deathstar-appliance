@@ -1,7 +1,7 @@
 
 var myAppRouter = Backbone.Router.extend({
     routes: {
-        'initialize?from=*from' : 'initialize',
+        'initialize?from=*fromURL' : 'initialize',
         'initializing' : 'initializing',
         '*path': 'main'
     },

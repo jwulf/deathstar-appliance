@@ -11,16 +11,16 @@
             </div>
             <div class="span9">
                 <div class="row">
-                    <div class="span5 alert alert-block fade in {{message_class}}">
+                    <div class="span6 alert alert-block fade in {{message_class}}">
                         <h4 class="alert-heading">{{status_title}}</h4>
                         <p>{{message}}</p>              
                         {{#if initializing_success}}
                         <p>{{{msg "msg_initializing_success_recommendation"}}}</p>
-                        <p>{{{button "button_initialization_success" "btn-block btn span3 btn-success"}}}</p>
+                        <p>{{{button "button_initialization_success" "btn-block btn span3 deathstar-navlink btn-success"}}}</p>
                         {{/if}}
                         {{#if initializing_error}}
                         <p>{{{msg "msg_initializing_fail_recommendation"}}}</p>
-                        <p class="span3">{{{button "button_initialization_error" "btn-block btn span3 btn-danger "}}}</p>
+                        <p class="span3">{{{button "button_initialization_error" "btn-block deathstar-navlink btn span3 btn-danger "}}}</p>
                         {{/if}}
                     </div> 
                 </div>
