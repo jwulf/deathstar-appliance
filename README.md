@@ -1,8 +1,6 @@
 deathstar-appliance
 ===================
 
-Requires 
+Requires: 
 
-meteor add http
-meteor add backbone
-meteor add bootstrap
+meteor add http, backbone, bootstrap
