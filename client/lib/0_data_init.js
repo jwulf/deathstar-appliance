@@ -1,4 +1,9 @@
- Config = new Meteor.Collection("Configuration");
+Meteor.subscribe('ConfigurationSubscription');
+Meteor.subscribe('BooksSubscription');
+
+Books = new Meteor.Collection('CheckedOutBooks');
+
+Config = new Meteor.Collection("Configuration");
  
 // Application workflow states are different states that the app can be in
 // In each state different urls are valid, thus enabling workflow control
@@ -22,7 +27,10 @@ Session.set('applicationState', (configuration == true ? 'configured' : 'unconfi
 var systemConfig = Config.find({domain: 'system'}).fetch();
 if (systemConfig) {
     Session.set('productionState',  systemConfig.productionState);
+    Session.set('testServerURL', systemConfig.testServerURL);
+    Session.set('productionServerURL', systemConfig.productionServerURL);
 }
     
+
     
 

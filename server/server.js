@@ -1,15 +1,25 @@
-exec = __meteor_bootstrap__.require('child_process').exec;
-spawn = __meteor_bootstrap__.require('child_process').spawn;
 
-INSTALL_DIR = '/opt/deathstar-appliance';
-CONFIG_URL = '/config/configurationURL.json';
+var require = __meteor_bootstrap__.require;
+
+exec = require('child_process').exec;
+spawn = require('child_process').spawn;
+path = require('path');
+fs =  require('fs');
+xslt = require('node_xslt');
+
+var basepath = (path.resolve('.'));
+
 
 Meteor.startup(function () {
-
     Config = new Meteor.Collection("Configuration");
     InstalledUpdates = new Meteor.Collection("InstalledUpdates");
     AvailableUpdates = new Meteor.Collection("AvailableUpdates");
+    
+    console.log('Running from ' + basepath);
 
+    Meteor.publish('ConfigurationSubscription', function() {
+        return Config.find({});    
+    });
 // appliance configuration is system-level files and database fields containing
 // URLS and other site-specific configuration data
 
@@ -169,10 +179,19 @@ Meteor.methods({
                 
                 if (task.action && task.action == CMD_COPY_FILE) {
                     if (task.src && task.dest) {
-                        if (dryrun) result['task_' + numerator] = '"'+ item + '" :' +
-                            '\nCopy ' + task.src + ' to ' + task.dest + '\n';
+                        if (dryrun) 
+                            if (task.perms) {
+                                result['task_' + numerator] = '"'+ item + '" :' +
+                                    '\nCopy ' + task.src + ' to ' + task.dest + 
+                                    ', and set perm: ' + task.perms + '\n';
+                            } else {
+                                result['task_' + numerator] = '"'+ item + '" :' +
+                                    '\nCopy ' + task.src + ' to ' + 
+                                    task.dest + '\n';
+                            }
                             
-                        if (!dryrun) Meteor.call('copyFile', task.src, task.dest);       
+                        if (!dryrun) Meteor.call('copyFile', task.src, 
+                                                    task.dest, task.perms);       
                         
                         numerator ++;
                     }
@@ -279,7 +298,7 @@ Meteor.methods({
     // Should be protected in a production model
     pullUpdate: function () {
         console.log('Executing git pull to update server code');
-        exec('git pull', {cwd: INSTALL_DIR},
+        exec('git pull', {cwd: basepath},
             function (error, stdout, stderr) {
                     if (error !== null)
                         console.log('exec error: ' + error);
@@ -304,13 +323,84 @@ Meteor.methods({
     
     // Method exposed to allow rapid prototyping and troubleshooting in the field
     // Should be protected in a production model
-    copyFile: function (src, dest) {
+    copyFile: function (src, dest, perms) {
         cmd = 'curl ' + src + ' --insecure --output ' + dest;
         console.log('Executing: ' + cmd);
         exec(cmd, 
             function (error, stdout, stderr) {
-                if (error !== null)
+                if (error !== null) {
                     console.log('exec error: ' + error);
+                } else {
+                    if (perms) {
+                        cmd = 'chmod ' + perms + ' ' + dest;
+                        exec(cmd, function (err, stdout, stderr)
+                        {
+                            console.log(err);
+                            console.log(stderr);
+                        });
+                    }
+                }
+        });
+    },
+    
+    htmlPreview: function (xmlpayload) {
+        var preview="<p>Could not transform</p>";
+        console.log("Message was: " + xmlpayload);
+    
+        
+        var stylesheet = xslt.readXsltFile(basepath + "/server/xsl/html-single.xsl");
+        try
+	    {
+            var xmldocument = xslt.readXmlString(xmlpayload);
+            renderedHTML = xslt.transform(stylesheet, xmldocument, ['body.only', '1', 'tablecolumns.extension', '0']);
+        }
+	    catch (err)
+        {
+            console.log(err);
+            renderedHTML="<p>Could not transform</p>";
+        }
+	    console.log("Transformed: " + renderedHTML);
+
+        return renderedHTML;    
+    },
+    
+    dtdValidate: function (xmlpayload) {
+        var dtdstring=("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+            "<!DOCTYPE section PUBLIC \"-//OASIS//DTD DocBook XML V4.5//EN\"\n" +
+            "\"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd\" []>");
+        var filenumber=1;
+        while (fs.existsSync("/tmp/topic"+ filenumber))
+            filenumber++;
+        var filename="/tmp/topic"+filenumber;
+        var errorText="";
+        fs.writeFile(filename, dtdstring + xmlpayload, function(err){
+            if(err) {
+                    console.log(err);
+            } else {
+                console.log("Saved topic file" + filename);
+        }});
+    
+        var onFinish=function (error, stdout, stderr){
+           errorText=errorText+stderr;
+        }
+        var command="xmllint --noout --valid " + filename;
+        child = exec(command, onFinish);
+        child.addListener("exit", function(code,signal){
+            console.log("Exit code: "+ code);
+             fs.unlink(filename, function(err)
+            {
+                if (err) {console.log(err);}
+                else{console.log("Successfully deleted "+ filename);}
+            });
+        
+            if (code===0)
+            {
+                return code;
+            }
+            else
+            {
+                return errorText;
+            }
         });
     }
     

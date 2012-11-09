@@ -25,7 +25,9 @@
             "fallback" : "welcome" ,
             "public/log" : "1",
             "initialize": "1", 
-            "configuration" : "1"
+            "configuration" : "1",
+            "edit" : "1",
+            "docbookreference" : "1"
             }  
 } 
 
