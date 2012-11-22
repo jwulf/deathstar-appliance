@@ -32,12 +32,53 @@ To run the appliance in VirtualBox, convert the image to VirtualBox format with:
 
 VBoxManage convertdd deathstar-appliance-sda.raw deathstar-appliance.vdi
 
-Contributing Code
-=================
+Looking at, and modifying the  Code
+===================================
 
 The Death Star appliance exposes a web-browser based IDE on port 10108.
 
 You can use this to examine, and modify the source code of the running application.
+
+Be aware that you can break the running application when you do this. 
+
+If you do something that breaks it, you can always reset it by opening the Console
+at the bottom of the IDE and issuing the command:
+
+git reset --hard
+
+This will reset your appliance code to the latest stable version
+
+Switching to the Test Branch
+============================
+
+The Test Branch is where you can try out new functionality that is being tested.
+
+To switch to the test branch, open the IDE  by going to 
+http://deathstar.local:10108 in your browser
+
+In the Console at the bottom of the screen enter the command:
+
+git branch test
+
+To switch back to the stable branch issue the command:
+
+git branch 1.0-stable
+
+Switching to the Development Branch
+===================================
+
+The development branch is the one you want to track if you are writing new
+features or stablising code.
+
+To switch to the development branch, open the IDE by going to 
+http://deathstar.local:10108 in your browser
+
+In the Console at the bottom of the screen enter the command:
+
+git branch devel
+
+Contributing Code
+=================
 
 To contribute patches, fork the github repository for the application at
 www.github.com/jwulf/deathstar-appliance.
