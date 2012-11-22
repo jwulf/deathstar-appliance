@@ -10,7 +10,7 @@ var myAppRouter = Backbone.Router.extend({
     main: function (path) {
         var newpath;
         console.log('Routing ' + path);
-        if ( path == '/' ) path = 'index';
+        if ( path == '/' || path == '' ) path = 'index';
         newpath = getValidURLinWorkflow(path);
         Session.set('page_id', newpath);
     },
