@@ -14,18 +14,36 @@ code {
     border: none;
 }
 
-a.deathstar-navlink {
+a.deathstar-navlink a.btn-block.deathstar-navlink .btn-danger{
    outline-color: white;
     background-color: white;
   color: white;    
 }
 
+a.btn:visited {
+        color:black
+}
+
+a.btn{
+        color: black;
+        outline-color: white;
+}
+
 a.btn.btn-success:active {
     color: white;
+    outline-color: white;
 }
-a:visited.btn-success {
-    color:white;
+
+a.btn.btn-success a.btn.btn-danger {
+    color: white;
+    outline-color: white;
 }
+
+a.btn.btn-success:visited a.btn.btn-danger:visited {
+    color: white;
+    outline-color: white;
+}
+
 a:visited.deathstar-navlink {
     outline-color: white;
     background-color: white;
