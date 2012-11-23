@@ -68,11 +68,11 @@ http://deathstar.local:10108 in your browser
 
 In the Console at the bottom of the screen enter the command:
 
-git branch test
+git checkout test
 
 To switch back to the stable branch issue the command:
 
-git branch 1.0-stable
+git checkout 1.0-stable
 
 Switching to the Development Branch
 ===================================
@@ -85,7 +85,7 @@ http://deathstar.local:10108 in your browser
 
 In the Console at the bottom of the screen enter the command:
 
-git branch devel
+git checkout devel
 
 Contributing Code
 =================
