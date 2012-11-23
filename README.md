@@ -32,6 +32,16 @@ To run the appliance in VirtualBox, convert the image to VirtualBox format with:
 
 VBoxManage convertdd deathstar-appliance-sda.raw deathstar-appliance.vdi
 
+Automated Updates and Hacking the Code
+======================================
+
+In its "out-of-the-box" state, your appliance has the ability to pull down
+updates via git pull. 
+
+Once you start hacking on the code of your appliance this will no longer work.
+Once you start hacking you will need to manually pull updates, or you'll need to
+do a git reset to re-enable this ability. 
+
 Looking at, and modifying the  Code
 ===================================
 
@@ -39,12 +49,12 @@ The Death Star appliance exposes a web-browser based IDE on port 10108.
 
 You can use this to examine, and modify the source code of the running application.
 
-Be aware that you can break the running application when you do this. 
-
-If you do something that breaks it, you can always reset it by opening the Console
-at the bottom of the IDE and issuing the command:
+Be aware that you can break the running application when you do this; but don't 
+worry, if you do something that breaks it, you can always reset it by opening 
+the Console at the bottom of the IDE and issuing the command:
 
 git reset --hard
+git checkout 1.0-stable
 
 This will reset your appliance code to the latest stable version
 
