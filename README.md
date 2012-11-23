@@ -69,6 +69,7 @@ http://deathstar.local:10108 in your browser
 In the Console at the bottom of the screen enter the command:
 
 git checkout test
+git pull
 
 To switch back to the stable branch issue the command:
 
@@ -86,6 +87,7 @@ http://deathstar.local:10108 in your browser
 In the Console at the bottom of the screen enter the command:
 
 git checkout devel
+git pull
 
 Contributing Code
 =================
