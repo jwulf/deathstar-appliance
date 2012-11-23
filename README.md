@@ -56,7 +56,7 @@ the Console at the bottom of the IDE and issuing the command:
 git reset --hard
 git checkout 1.0-stable
 
-This will reset your appliance code to the latest stable version
+This will reset your appliance code to the latest stable version.
 
 Switching to the Test Branch
 ============================
