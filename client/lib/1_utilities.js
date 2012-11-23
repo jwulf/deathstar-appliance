@@ -71,6 +71,9 @@ function URLPathToTemplateID(url_path) {
 
 function getValidURLinWorkflow(url) {
     
+    //DEBUG - Allow everything
+    return url;
+    
     var page_id = URLPathToTemplateID(url);
     var applicationState = Session.get('applicationState');
     

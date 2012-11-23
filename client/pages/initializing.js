@@ -35,7 +35,7 @@ Template.initializing.postmessage_text = function () {
 
 Handlebars.registerHelper('postmessage', function () {
     var initDetails = Session.get('initializationResult');    
-    return (initDetails.originalJSON && initDetails.originalJSON.postmessage);
+    return (initDetails && (!_.isUndefined(initDetails.originalJSON)) && (!_.isUndefined(initDetails.originalJSON.postmessage)));
 });
     
 Handlebars.registerHelper('initializing_success',  function () {
