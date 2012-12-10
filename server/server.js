@@ -9,6 +9,8 @@ xslt = require('node_xslt');
 
 var basepath = (path.resolve('.'));
 
+var VPNConfig;
+
 
 Meteor.startup(function () {
     Config = new Meteor.Collection("Configuration");
@@ -28,6 +30,9 @@ Meteor.startup(function () {
     Meteor.publish('ConfigurationSubscription', function() {
         return Config.find({});    
     });
+    
+ 
+    
 // appliance configuration is system-level files and database fields containing
 // URLS and other site-specific configuration data
 
@@ -55,14 +60,26 @@ Meteor.methods({
         
         // First, we check for existing configuration information
         // This is a one-time operation        
-        if (Config.find({}).count() !== 0) return ({error: 2, msg: 'This machine has already been initialized. Initialization is a one-time operation. For further configuration use manual configuration or remote updates.'});
+        if (Config.find({}).count() !== 0) return (
+            {
+                error: 2, 
+                msg: 'This machine has already been initialized. Initialization ' +
+                'is a one-time operation.  For further configuration use manual' +
+                'configuration or remote updates.'
+            }
+        );
         
         var result = updateFromURL(url);
-        if (!result.error)  
-            Config.insert({initialized: 'remotely', date: humanDate(), remoteInitializationURL : url});
+        if ( ! result.error )  
+            Config.insert(
+                {
+                    initialized: 'remotely', 
+                    date: humanDate(), 
+                    remoteInitializationURL : url
+                }
+            );
         
-        return result;
-            
+        return result;    
     },
     
     // Method exposed to allow rapid prototyping and troubleshooting in the field
@@ -226,30 +243,8 @@ Meteor.methods({
                             var isNew = false;
                             var updateObject = {};
                             
-                            if ( task.operation == "set" ) {
-                                    
-                                console.log('find({ domain: ' + task.domain+'})');
-                                record = Config.find({domain: task.domain}).fetch();
-                                if (record.length === 0) {
-                                    // initializing this domain
-                                    console.log('Initializing domain: ' + task.domain);
-                                    updateObject.domain = task.domain;
-                                    updateObject[task.key] = task.value;
-                                    console.log(updateObject);
-                                    console.log('Config.insert(');
-                                    console.log(updateObject);
-                                    Config.insert(updateObject);
-                                } else {
-                                    // updating this domain
-                                    console.log('Updating domain: ' + task.domain);
-                                    updateField = {};
-                                    updateField[task.key] = task.value;
-                                    updateObject = { $set: updateField };
-                                    console.log('Config.update({domain : ' + task.domain+'},');
-                                    console.log(updateObject);
-                                    Config.update({domain: task.domain}, updateObject);
-                                }
-                            }
+                            if ( task.operation == "set" ) 
+                                Meteor.call( 'setConfigKeyValue', task );
                             
                             // Check this out, because I think this will delete the
                             // whole document
@@ -273,7 +268,7 @@ Meteor.methods({
                         if (dryrun) result['task_' + numerator] = '"' + item + '" :' + 
                             '\nInstall Package ' + task.pkg + '\n';
                         if (!dryrun)
-                            Meteor.call('installPackage',task.pkg);   
+                            Meteor.call( 'installPackage', task.pkg );   
                         numerator ++;
                     }
                 }
@@ -307,6 +302,31 @@ Meteor.methods({
         }
     },
     
+    setConfigKeyValue: function ( task ) {
+        //console.log('find({ domain: ' + task.domain+'})');
+        var updateObject = {};
+        
+        record = Config.find({domain: task.domain}).fetch();
+        if (record.length === 0) {
+            // initializing this domain
+            console.log('Initializing domain: ' + task.domain);
+            updateObject.domain = task.domain;
+            updateObject[task.key] = task.value;
+            console.log(updateObject);
+            console.log('Config.insert(');
+            console.log(updateObject);
+            Config.insert(updateObject);
+        } else {
+            // updating this domain
+            console.log('Updating domain: ' + task.domain);
+            updateField = {};
+            updateField[task.key] = task.value;
+            updateObject = { $set: updateField };
+            console.log('Config.update({domain : ' + task.domain+'},');
+            console.log(updateObject);
+            Config.update({domain: task.domain}, updateObject);
+        }
+    }
     // Method exposed to allow rapid prototyping and troubleshooting in the field
     // Should be protected in a production model
     pullUpdate: function () {
@@ -358,15 +378,17 @@ Meteor.methods({
     },
     
     htmlPreview: function (xmlpayload) {
-        var preview="<p>Could not transform</p>";
-        console.log("Message was: " + xmlpayload);
-    
-        
+    //    console.log("Message was: " + xmlpayload);
+      
         var stylesheet = xslt.readXsltFile(basepath + "/server/xsl/html-single.xsl");
         try
 	    {
             var xmldocument = xslt.readXmlString(xmlpayload);
-            renderedHTML = xslt.transform(stylesheet, xmldocument, ['body.only', '1', 'tablecolumns.extension', '0']);
+            renderedHTML = xslt.transform(
+                stylesheet, 
+                xmldocument, 
+                ['body.only', '1', 'tablecolumns.extension', '0']
+            );
         }
 	    catch (err)
         {
@@ -403,21 +425,68 @@ Meteor.methods({
             console.log("Exit code: "+ code);
              fs.unlink(filename, function(err)
             {
-                if (err) {console.log(err);}
-                else{console.log("Successfully deleted "+ filename);}
+                if (err) { console.log(err); }
+                else { console.log("Successfully deleted "+ filename); }
             });
         
-            if (code===0)
-            {
-                return code;
-            }
-            else
-            {
-                return errorText;
-            }
+            if ( code === 0 ) { return code; }
+            else { return errorText; }
         });
-    }
+    },
     
+    bringUpVPN: function (vpnPassword) {
+        
+        /*
+            VPN access is needed when running in VirtualBox under Mac OS X. 
+            The VM can't utilise the VPN connection of the host, so it needs to 
+            bring up its own VPN connection.
+            
+            When the host changes networks, the VPN will remain up, but in a 
+            failed state. In that case, the user needs to both restart the network 
+            and bring the vpn back up.
+        */
+        
+        var systemConfig = Config.find({domain: 'system'}).fetch();
+            
+        /* 
+            The client-side code is responsible for checking that sufficient VPN
+            configuration details are stored, and requesting them from the user
+            when they are not available to us.
+        */
+    
+        vpncConfFile = '/etc/vpnc/defaults.conf';
+        
+        /* 
+            VPNC Configuration information from:
+            https://ask.fedoraproject.org/question/737/how-do-i-start-a-vpn-session-via-the-command-line
+        */
+        
+        vpncConfiguration = 
+            'IPSec gateway ' + systemConfig.VPN_IPSecGateway + '\n' +
+            'IPSec ID ' + systemConfig.VPN_IPSecID + '\n' + 
+            'IPSec secret ' + systemConfig.VPN_IPSecSecret + '\n' + 
+            'XAuth username ' + systemConfig.VPN_IPSecXAuthUsername + '\n' +
+            'XAuth password ' + vpnPassword;
+            
+        fs.writeFileSync(vpncConfFile, vpncConfiguration);
+        exec('vpnc', { cwd: basepath },
+            function (error, stdout, stderr) {
+                    console.log(stdout);
+                    if (error !== null)
+                        console.log('vpnc exec error: ' + error);
+                 }
+            );
+    },
+    
+    restartNetwork: function () {
+        exec('service network restart', { cwd: basepath },
+        function (error, stdout, stderr) {
+                console.log(stdout);
+                if (error !== null)
+                    console.log('vpnc exec error: ' + error);
+             }
+        );    
+    }
 });
 
 function humanDate() {
