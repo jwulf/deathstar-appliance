@@ -326,7 +326,7 @@ Meteor.methods({
             console.log(updateObject);
             Config.update({domain: task.domain}, updateObject);
         }
-    }
+    },
     // Method exposed to allow rapid prototyping and troubleshooting in the field
     // Should be protected in a production model
     pullUpdate: function () {
